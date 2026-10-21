@@ -1,10 +1,11 @@
 import {readFile} from 'node:fs/promises';
-const json=async(root:string,p:string)=>{try{return JSON.parse(await readFile(`${root}/${p}`,'utf8'));}catch(e){throw new Error(`${p}: ${(e as Error).message}`);}};
+const json=async(root:string,p:string,errs:string[])=>{try{return JSON.parse(await readFile(`${root}/${p}`,'utf8'));}catch(e){errs.push(`${p}: ${(e as Error).message}`);return undefined;}};
 /** Returns a list of problems for a generated actor folder; empty means valid. */
 export async function validateActor(root:string):Promise<string[]>{
  const errs:string[]=[];const need=(ok:unknown,m:string)=>{if(!ok)errs.push(m);};
  try{
-  const actor=await json(root,'.actor/actor.json'),input=await json(root,'.actor/INPUT_SCHEMA.json'),ds=await json(root,'.actor/dataset_schema.json'),target=await json(root,'target.json'),pkg=await json(root,'package.json');
+  const actor=await json(root,'.actor/actor.json',errs),input=await json(root,'.actor/INPUT_SCHEMA.json',errs),ds=await json(root,'.actor/dataset_schema.json',errs),target=await json(root,'target.json',errs),pkg=await json(root,'package.json',errs);
+  if(errs.length)return errs; // structural checks need every file loaded
   need(actor.actorSpecification===1,'actor.json: actorSpecification must be 1');
   for(const k of ['name','title','description','version'])need(typeof actor[k]==='string'&&actor[k],`actor.json: missing ${k}`);
   need(actor.name===target.id,'actor.json: name must match target.json id');

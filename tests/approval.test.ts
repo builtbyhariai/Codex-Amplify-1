@@ -1,3 +1,4 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {signApproval,stableHash,verifyApproval} from '../src/approval.js';import YAML from 'yaml';import {readFileSync} from 'node:fs';
 const target=YAML.parse(readFileSync('catalog/targets/us-public-procurement.yaml','utf8'));
 test('signed approval is config-bound',()=>{const a=signApproval({candidateId:'c',actorId:target.id,action:'publish-paid',approvedBy:'hari',issuedAt:new Date().toISOString(),expiresAt:new Date(Date.now()+60000).toISOString(),configHash:stableHash(target)},'secret');assert.doesNotThrow(()=>verifyApproval(a,target,'secret'));assert.throws(()=>verifyApproval(a,{...target,title:'changed'},'secret'));});
+test('empty secret is rejected',()=>assert.throws(()=>signApproval({candidateId:'c',actorId:'a',action:'publish-paid',approvedBy:'o',issuedAt:'x',expiresAt:'y',configHash:'h'},''),/empty/));

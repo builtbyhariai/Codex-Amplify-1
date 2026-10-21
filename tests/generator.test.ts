@@ -26,5 +26,5 @@ test('validate reports every problem found',()=>withTmp(async d=>{
 }));
 
 test('validate reports missing files instead of crashing',async()=>{
- const errs=await validateActor('does-not-exist');assert.equal(errs.length,1);assert.match(errs[0]!,/actor\.json/);
+ const errs=await validateActor('does-not-exist');assert.ok(errs.length>=1);assert.match(errs[0]!,/actor\.json/);
 });
